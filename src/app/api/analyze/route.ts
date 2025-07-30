@@ -164,7 +164,7 @@ You MUST return ONLY a valid JSON object with this exact structure. No additiona
   "importantNote": "本分析基于中医理论，仅供健康参考。如有严重症状，请及时就医。"
 }`;
 
-    let prompt: any[] = [expertSystemPrompt];
+    let prompt: (string | { inlineData: { mimeType: string; data: string } })[] = [expertSystemPrompt];
 
     // Add image if provided
     if (imageUrl) {
@@ -215,7 +215,7 @@ You MUST return ONLY a valid JSON object with this exact structure. No additiona
         .replace(/```/g, '') // Remove markdown code blocks
         .trim();
       
-      const parsedData = JSON.parse(jsonString) as any;
+      const parsedData = JSON.parse(jsonString) as Record<string, unknown>;
       
       // Validate the required structure
       const requiredKeys: (keyof AnalysisData)[] = ['visualFeatures', 'tcmPatterns', 'holisticAnalysis', 'dietarySuggestions', 'lifestyleSuggestions', 'importantNote'];
@@ -233,7 +233,7 @@ You MUST return ONLY a valid JSON object with this exact structure. No additiona
         }
       });
       
-      analysisData = parsedData as AnalysisData;
+      analysisData = parsedData as unknown as AnalysisData;
       
     } catch (parseError) {
       console.error('Error parsing AI response as JSON:', parseError);

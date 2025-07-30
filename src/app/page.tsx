@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { AnalysisResponse, QuestionData, isAnalysisError, isAnalysisResult } from "../types/analysis";
 
 // Complete questionnaire data structure
 const quizSteps = [
@@ -38,13 +39,13 @@ export default function Home() {
   // Wizard state management
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [analysis, setAnalysis] = useState<any>(null);
+  const [analysis, setAnalysis] = useState<AnalysisResponse | null>(null);
   
   // Flow control state for two-step diagnosis
   const [submissionState, setSubmissionState] = useState<'idle' | 'loadingQuestions' | 'questionsReady' | 'loadingAnalysis' | 'analysisReady'>('idle');
   
   // AI questions state
-  const [aiQuestions, setAiQuestions] = useState<any[]>([]);
+  const [aiQuestions, setAiQuestions] = useState<QuestionData[]>([]);
   const [aiAnswers, setAiAnswers] = useState<{[key: number]: string | string[]}>({});
   
   const [formData, setFormData] = useState({
@@ -534,9 +535,11 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="mt-4">
-                      <img
+                      <Image
                         src={URL.createObjectURL(formData.imageFile)}
                         alt="舌头照片预览"
+                        width={192}
+                        height={192}
                         className="max-w-full h-auto max-h-48 rounded-lg border border-gray-300 mx-auto shadow-md"
                       />
                     </div>
@@ -557,7 +560,7 @@ export default function Home() {
                   <h2 className="text-3xl font-bold text-gray-800 mb-2">正在分析中...</h2>
                   <p className="text-gray-600">请稍候，我们正在为您生成个性化的健康分析报告</p>
                 </div>
-              ) : analysis.error ? (
+              ) : isAnalysisError(analysis) ? (
                 <div className="text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
                     <span className="text-2xl">❌</span>
@@ -565,7 +568,7 @@ export default function Home() {
                   <h2 className="text-3xl font-bold text-red-600 mb-2">分析失败</h2>
                   <p className="text-red-600">{analysis.error}</p>
                 </div>
-              ) : (
+              ) : isAnalysisResult(analysis) ? (
                 <div className="space-y-8">
                   <div className="text-center">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
@@ -628,7 +631,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
           )}
 
@@ -704,14 +707,14 @@ export default function Home() {
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                     分析中...
                   </>
-                ) : (
+                ) : analysis && isAnalysisResult(analysis) ? (
                   <>
                     提交并分析
                     <svg className="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                     </svg>
                   </>
-                )}
+                ) : null}
               </button>
             ) : (
               <button
@@ -821,7 +824,7 @@ export default function Home() {
                                       </svg>
                                     )}
                                   </div>
-                                ) : (
+                                ) : analysis && isAnalysisResult(analysis) ? (
                                   // Radio style
                                   <div className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center ${
                                     isSelected
@@ -832,7 +835,7 @@ export default function Home() {
                                       <div className="w-2 h-2 rounded-full bg-white"></div>
                                     )}
                                   </div>
-                                )}
+                                ) : null}
                                 <span className={`text-base font-medium ${
                                   isSelected ? 'text-purple-700' : 'text-gray-700'
                                 }`}>
@@ -896,7 +899,7 @@ export default function Home() {
           {/* FINAL ANALYSIS RESULTS */}
           {submissionState === 'analysisReady' && analysis && (
             <div className="space-y-8">
-              {analysis.error ? (
+              {isAnalysisError(analysis) ? (
                 <div className="text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
                     <span className="text-2xl">❌</span>
@@ -904,7 +907,7 @@ export default function Home() {
                   <h2 className="text-3xl font-bold text-red-600 mb-2">分析失败</h2>
                   <p className="text-red-600">{analysis.error}</p>
                 </div>
-              ) : (
+              ) : isAnalysisResult(analysis) ? (
                 <div className="space-y-8">
                   <div className="text-center">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
@@ -998,7 +1001,7 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
           )}
         </div>

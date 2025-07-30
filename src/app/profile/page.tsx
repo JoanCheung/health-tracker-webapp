@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 
@@ -130,9 +131,11 @@ export default function ProfilePage() {
                     <h3 className="text-xl font-bold text-gray-800">舌诊图片</h3>
                   </div>
                   <div className="bg-white p-4 rounded-xl shadow-md">
-                    <img 
+                    <Image 
                       src={selectedRecord.image_url} 
                       alt="舌诊图片" 
+                      width={384}
+                      height={384}
                       className="w-full max-w-sm mx-auto rounded-lg shadow-md border border-gray-200"
                     />
                   </div>

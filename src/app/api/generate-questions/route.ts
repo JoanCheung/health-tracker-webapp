@@ -88,7 +88,7 @@ You MUST return ONLY a valid JSON object with this exact structure. No additiona
   ]
 }`;
 
-    let prompt: any[] = [tcmDiagnosticianPrompt];
+    let prompt: (string | { inlineData: { mimeType: string; data: string } })[] = [tcmDiagnosticianPrompt];
 
     // Add image if provided
     if (imageUrl) {
@@ -132,7 +132,7 @@ You MUST return ONLY a valid JSON object with this exact structure. No additiona
       const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
       const jsonString = jsonMatch ? jsonMatch[0] : cleanedText;
       
-      const parsedData = JSON.parse(jsonString) as any;
+      const parsedData = JSON.parse(jsonString) as Record<string, unknown>;
       
       // Validate the required structure
       if (!parsedData.questions || !Array.isArray(parsedData.questions)) {
@@ -140,7 +140,7 @@ You MUST return ONLY a valid JSON object with this exact structure. No additiona
       }
       
       // Validate each question object
-      parsedData.questions.forEach((question: any, index: number) => {
+      parsedData.questions.forEach((question: Record<string, unknown>, index: number) => {
         if (!question.questionText || typeof question.questionText !== 'string') {
           throw new Error(`Invalid question ${index + 1}: missing or invalid questionText`);
         }
@@ -149,7 +149,7 @@ You MUST return ONLY a valid JSON object with this exact structure. No additiona
         }
       });
       
-      questionsData = parsedData as QuestionsResponse;
+      questionsData = parsedData as unknown as QuestionsResponse;
       
     } catch (parseError) {
       console.error('Error parsing AI response as JSON:', parseError);
